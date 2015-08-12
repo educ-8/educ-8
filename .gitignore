@@ -2,6 +2,7 @@ venv
 *.pyc
 staticfiles
 *.db
+*.dylib
 
 # Boilerplate gitignore for Python from https://github.com/github/gitignore/blob/master/Python.gitignore
 
