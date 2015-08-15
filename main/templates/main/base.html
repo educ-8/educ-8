@@ -1,0 +1,59 @@
+{% load staticfiles i18n%}
+<html>
+  <head>
+    <title>{% block title %}Educ-8{% endblock title %}</title>
+    {% block stylesheets %}
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+      <link rel="stylesheet" href="{% static "css/main.css" %}" type="text/css">
+    {% endblock %}
+
+    {% block react %}
+      <script src="https://fb.me/react-0.13.3.min.js"></script>
+      <script src="https://fb.me/JSXTransformer-0.13.3.js"></script>
+    {% endblock %}
+
+    {% block metatags %}
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% endblock %}
+  </head>
+  <body>
+    <div class="header navbar">
+      <div class="container">
+        <a class="navbar-brand" href="/">Educ-8</a>
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+          {% if request.user.is_authenticated %}
+            <!-- users:detail -->
+            <li><a href="{% url 'profile' request.user.username %}">{% trans "My Profile" %}</a></li>
+            <li><a href="{% url 'account_logout' %}">{% trans "Logout" %}</a></li>
+          {% else %}
+            <li><a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a></li>
+            <li><a href="{% url 'account_login' %}">{% trans "Log in" %}</a></li>
+          {% endif %}  
+        </ul>
+      </div>
+    </div>
+
+    <div class="container" id="messages">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}
+      <!-- <p>Use this document as a way to quick start any new project.</p> -->
+    {% endblock content %}
+
+    </div> <!-- /container -->
+
+    {% block modal %}{% endblock modal %}
+    {% block javascript %}
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+      <script src="{% static 'js/main.js' %}"></script>
+    {% endblock javascript %}
+  </body>
+</html>

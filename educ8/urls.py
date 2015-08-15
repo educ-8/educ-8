@@ -15,7 +15,21 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from main import views
 
 urlpatterns = [
+    url(r'^$', views.index, name="home"),
+    url(r'^search/$', views.search),
+
+    # Django admin
     url(r'^admin/', include(admin.site.urls)),
+
+    # empty pages for now
+    url(r'^about/', views.about, name="about"),
+    url(r'^login/', views.coming_soon, name="login"),
+    url(r'^profile/', views.coming_soon, name="profile"),
+    url(r'^logout/', views.coming_soon, name="account_logout"),
+    url(r'^login/', views.coming_soon, name="account_login"),
+    url(r'^signup/', views.coming_soon, name="account_signup"),
+    
 ]
