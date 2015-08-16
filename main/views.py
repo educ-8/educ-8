@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from main.forms import SearchForm
-from models import get_photos
+from main.services import get_photos
 
 # Create your views here.
 def index(request):
