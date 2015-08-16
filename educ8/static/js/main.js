@@ -1,52 +1,62 @@
 $(function() {
 
-  console.log('main.js loaded');  
-
   $('#search-form').on('submit', function(e){
     e.preventDefault();
-    search_term = $.trim($('#search-term').val())
-    console.log("form submitted");
-    console.log(search_term);
+    var search_term = $.trim($('#search-term').val())
     $('#results').empty();
-    $('#status').text('Searching for ' + search_term + '...');
+    var statusMessage = $('<p>Searching for ' + search_term + '...</p>').addClass('status-message');
+    $('#status').append(statusMessage);
+    $('.status-message').fadeIn(1000);
     search()
-  });
-
-  function search() {
-    console.log("search() is working!")
-    $.ajax({
-      url: "search/", //the endpoint
-      data: { search_term: $.trim($('#search-term').val())},
-      success: function(json) {
-        $('#search-term').val('');
-        console.log(json);
-        if (json.hasError) {
-            $('#status').empty().append(json.message);
-        } else {
-            showResults(json);
-            $('#')
-        }
-      },
-      error: function(xhr, errmsg, err) {
-        console.log(xhr.status + ": " + xhr.responseText);
-        $('#status').empty().append(errmsg);
-      }
-    });
-  };
-
+    var progress = setInterval(function(){
+        $('.status-message').animate({
+            opacity: 0.40
+        }, 1000, function(){
+            $('.status-message').animate({
+                opacity: 1
+            }, 1000)
+        })
+    }, 2200);
+  });  
 });
 
+function search() {
+$.ajax({
+  url: "search/", //the endpoint
+  data: { search_term: $.trim($('#search-term').val())},
+  success: function(json) {
+    $('#search-term').val('');
+    if (json.hasError) {
+        $('#status').empty().append(json.message);
+    } else {
+        showResults(json);
+        $('#')
+    }
+  },
+  error: function(xhr, errmsg, err) {
+    $('.status-message').fadeOut();
+    $('#status').empty().append(errmsg);
+  }
+});
+};
+
 function showResults(results) {
-    var resultsList = $('<ul></ul>').css('list-style-type', 'none');
+    var resultsList = $('<ul></ul>');
     results.forEach(function (result){
         var resultsListItem = $('<li></li>').addClass('search-result');
-        var image = $('<img src="' + result.url + '">');
-        var user = $('<h4>' + result.username + '</h4>');
-        var avatar = $('<img src="' + result.avatar + '"">').css('height', '50px');
-        console.log(avatar);
-        var location = $('<p>' + result.location_name + '</p>');
-        var created = $('<p>' + result.created.substring(0,10) + '</p>');
-        var caption = $('<p>' + result.caption + '</p>');
+        var user = $('<h4>' + result.username + '</h4>').addClass('ig-username');
+        var avatar = $('<img src="' + result.avatar + '"">').addClass('ig-avatar');
+        var created = $('<p>' + result.created.substring(0,10) + '</p>').addClass('ig-created');
+        var location = $('<p>' + result.location_name + '</p>').addClass('ig-location');
+        var image = $('<img src="' + result.url + '">').addClass('ig-main-image');
+        var caption = $('<p>' + result.caption + '</p>').addClass('ig-caption');
+
+        // handler to confirm images loaded
+        $(image, avatar).on('error', function(){
+            console.log("main image didn't load");
+            $(this).parent().remove();
+        });
+
         resultsListItem.append(user)
             .append(avatar)
             .append(created)
@@ -57,7 +67,7 @@ function showResults(results) {
     });
     $('#status').empty();
     $('#results').empty().append(resultsList);
-}
+};
 
 // Form post security script
 // This function gets cookie with a given name

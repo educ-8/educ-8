@@ -3,13 +3,38 @@ input[type="text"] {
 }
 
 #results ul {
+  list-style-type: none;
   padding-left: 0;
+}
+
+.status-message {
+  font-size: 24px;
+  display: none;
 }
 
 .search-result {
   margin-bottom: 50px;
-  border: 1px dashed #999;
   border-radius: 10px;
   background-color: #eee;
-  padding-left: 20px;
+  padding: 20px 0 20px 20px;
+}
+
+.ig-main-image,
+.ig-username,
+.ig-avatar,
+.ig-location,
+.ig-created,
+.ig-caption {
+  max-width: 95%;
+  padding: 10px;
+}
+
+.ig-caption {
+/* overrides setting above by cascade */
+  max-width: 660px; 
+}
+
+.ig-avatar {
+  /* overrides setting above by cascade */
+  max-width: 150px;
 }
