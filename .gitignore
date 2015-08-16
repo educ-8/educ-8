@@ -3,6 +3,7 @@ venv
 staticfiles
 *.db
 *.dylib
+main/templates/main/services.py
 
 # Boilerplate gitignore for Python from https://github.com/github/gitignore/blob/master/Python.gitignore
 
