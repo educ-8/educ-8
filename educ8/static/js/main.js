@@ -22,7 +22,7 @@ $(function() {
 
 function search() {
 $.ajax({
-  url: "search/", //the endpoint
+  url: "search/",
   data: { search_term: $.trim($('#search-term').val())},
   success: function(json) {
     $('#search-term').val('');
@@ -69,7 +69,7 @@ function showResults(results) {
     $('#results').empty().append(resultsList);
 };
 
-// Form post security script
+// Form post security script. Source: https://gist.github.com/broinjc/db6e0ac214c355c887e5
 // This function gets cookie with a given name
 function getCookie(name) {
     var cookieValue = null;
