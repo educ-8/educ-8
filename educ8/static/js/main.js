@@ -5,7 +5,7 @@ $(function() {
     var search_term = $.trim($('#search-term').val())
     $('#results').empty();
     var statusMessage = $('<p>Searching for ' + search_term + '...</p>').addClass('status-message');
-    $('#status').append(statusMessage);
+    $('#status').empty().append(statusMessage);
     $('.status-message').fadeIn(1000);
     search()
     var progress = setInterval(function(){
@@ -30,7 +30,6 @@ $.ajax({
         $('#status').empty().append(json.message);
     } else {
         showResults(json);
-        $('#')
     }
   },
   error: function(xhr, errmsg, err) {
@@ -52,17 +51,19 @@ function showResults(results) {
         var caption = $('<p>' + result.caption + '</p>').addClass('ig-caption');
 
         // handler to confirm images loaded
-        $(image, avatar).on('error', function(){
-            console.log("main image didn't load");
-            $(this).parent().remove();
-        });
+        if (result.url) {
+            $(image, avatar).on('error', function(){
+                console.log("main image didn't load");
+                $(this).parent().remove();
+            });
+        };
 
         resultsListItem.append(user)
             .append(avatar)
             .append(created)
-            .append(location)
-            .append(image)
-            .append(caption);
+            .append(location);
+        if (result.url) {resultsListItem.append(image);}    
+        resultsListItem.append(caption);
         resultsList.append(resultsListItem);
     });
     $('#status').empty();
