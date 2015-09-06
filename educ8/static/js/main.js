@@ -21,25 +21,34 @@ $(function() {
 });
 
 function search() {
-$.ajax({
-  url: "search/",
-  data: { search_term: $.trim($('#search-term').val())},
-  success: function(json) {
-    $('#search-term').val('');
-    if (json.hasError) {
-        $('#status').empty().append(json.message);
-    } else {
-        showResults(json);
-    }
-  },
-  error: function(xhr, errmsg, err) {
-    $('.status-message').fadeOut();
-    $('#status').empty().append(errmsg);
-  }
-});
+    var search_term = $.trim($('#search-term').val())
+    $.ajax({
+      url: "search/",
+      data: { search_term: search_term},
+      success: function(json) {
+        $('#search-term').val('');
+        if (json.hasError) {
+            var errorMessage = $('<p>' + json.message + '</p>').addClass('error-message');
+            $('#status').empty().append(json.message);
+            $('.error-message').fadeIn(1000);
+        } else {
+            showResults(json, search_term);
+        }
+      },
+      error: function(xhr, errmsg, err) {
+        $('.status-message').fadeOut();
+        // console.log(xhr.responseText);
+        // console.log(xhr);
+        // console.log(errmsg);
+        // console.log(err);
+        var errorMessage = $('<p> Sorry, something went wrong. Please try again. </p>').addClass('error-message');
+        $('#status').empty().append(errmsg);
+        $('.error-message').fadeIn(1000);
+      }
+    });
 };
 
-function showResults(results) {
+function showResults(results, search_term) {
     var resultsList = $('<ul></ul>');
     results.forEach(function (result){
         var resultsListItem = $('<li></li>').addClass('search-result');
@@ -66,7 +75,9 @@ function showResults(results) {
         resultsListItem.append(caption);
         resultsList.append(resultsListItem);
     });
-    $('#status').empty();
+    var statusMessage = $('<p>Latest posts from ' + search_term + ':</p>').addClass('result-message');
+    $('#status').empty().append(statusMessage);
+    $('.result-message').fadeIn(1000);
     $('#results').empty().append(resultsList);
 };
 

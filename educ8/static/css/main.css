@@ -7,7 +7,9 @@ input[type="text"] {
   padding-left: 0;
 }
 
-.status-message {
+.status-message, 
+.result-message, 
+.error-message {
   font-size: 24px;
   display: none;
 }
