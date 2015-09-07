@@ -1,10 +1,27 @@
 from googlemaps import googlemaps
 from instagram.client import InstagramAPI
 import tweepy
+import facebook
 import os
 import ipdb
 
 # TODO: Break each class definition into a separate file and update import statements as needed
+class FBSearcher:
+    """Creates a Facebook client and returns search results"""
+    def __init__(self):
+        self.client = facebook.GraphAPI(os.environ['EDUC8_FB_APP_ACCESS_TOKEN'])
+    def get_lat_long(self, search_term):
+        search_result = {}
+        args = {'q': search_term, 'type':'place', 'category':'university'}
+        places = self.client.request('search', args)
+        for place in places['data']:
+            if place['name'].lower() == search_term.lower():
+                search_result['lat'] = place['location']['latitude']
+                search_result['lng'] = place['location']['longitude']
+                search_result['place_id'] = place['id']
+                break
+        return search_result
+
 class GMapsSearcher:
     """Creates a Gmaps client and returns search results"""
     def __init__(self):
@@ -99,15 +116,19 @@ def get_photos(search_term):
         original_search_term = search_term
         search_term += ' university'
 
-    try:
-        gmaps_api = GMapsSearcher()
-        search_result = gmaps_api.get_lat_long(search_term=search_term)
-        lat = search_result['lat']
-        lng = search_result['lng']
-    except (IndexError, googlemaps.exceptions.TransportError):
-        message = "Sorry, I couldn't find %s." % original_search_term
-        error_result = {'hasError': True, 'message': message}
-        return error_result
+    # try:
+    #     gmaps_api = GMapsSearcher()
+    #     search_result = gmaps_api.get_lat_long(search_term=search_term)
+    #     lat = search_result['lat']
+    #     lng = search_result['lng']
+    # except (IndexError, googlemaps.exceptions.TransportError):
+    #     message = "Sorry, I couldn't find %s." % original_search_term
+    #     error_result = {'hasError': True, 'message': message}
+    #     return error_result
+    fb_api = FBSearcher()
+    lat_lng_result = fb_api.get_lat_long(search_term = search_term)
+    lat = lat_lng_result['lat']
+    lng = lat_lng_result['lng'] 
 
     success_results = []
     ig_shortcodes = []
