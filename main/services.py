@@ -15,7 +15,7 @@ class FBSearcher:
         args = {'q': search_term, 'type':'place', 'category':'university'}
         places = self.client.request('search', args)
         for place in places['data']:
-            if place['name'].lower() == search_term.lower():
+            if place['name'].lower() == search_term.lower(): # is this condition too restrictive? requires 100% match ... could simply trust the api and return the first item in the list...
                 search_result['lat'] = place['location']['latitude']
                 search_result['lng'] = place['location']['longitude']
                 search_result['place_id'] = place['id']
@@ -165,6 +165,7 @@ def translate_short_name(search_term):
         'university of illinois': 'university of illinois at urbana-champaign',
         'pratt': 'pratt institute',
         'colorado': 'university of colorado boulder',
+        'julliard': 'the julliard school of performing arts and dance'
     }
     if search_term in short_names.keys():
         return short_names[search_term]
