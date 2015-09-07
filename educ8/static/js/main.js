@@ -29,7 +29,7 @@ function search() {
         $('#search-term').val('');
         if (json.hasError) {
             var errorMessage = $('<p>' + json.message + '</p>').addClass('error-message');
-            $('#status').empty().append(json.message);
+            $('#status').empty().append(errorMessage);
             $('.error-message').fadeIn(1000);
         } else {
             showResults(json, search_term);
@@ -37,10 +37,6 @@ function search() {
       },
       error: function(xhr, errmsg, err) {
         $('.status-message').fadeOut();
-        // console.log(xhr.responseText);
-        // console.log(xhr);
-        // console.log(errmsg);
-        // console.log(err);
         var errorMessage = $('<p> Sorry, something went wrong. Please try again. </p>').addClass('error-message');
         $('#status').empty().append(errmsg);
         $('.error-message').fadeIn(1000);

@@ -110,25 +110,25 @@ class TwitterSearcher:
 
 # TODO: Create a SchoolSearchManager object that handles the entire search and returns the result to the front end
 def get_photos(search_term):
-    # alter search term to include the word 'university'
-    # this needs to be more robust; pass to a function that generates a list of terms: 'x university', 'x college', 'university of x' and goes through them all
-    if 'university' not in search_term and 'college' not in search_term:
-        original_search_term = search_term
-        search_term += ' university'
+    # create list of terms to try in case user didn't enter full name of school
+    original_search_term = search_term
+    search_term = search_term.lower()
+    search_terms_to_try = resolve_search_term(search_term)
 
-    # try:
-    #     gmaps_api = GMapsSearcher()
-    #     search_result = gmaps_api.get_lat_long(search_term=search_term)
-    #     lat = search_result['lat']
-    #     lng = search_result['lng']
-    # except (IndexError, googlemaps.exceptions.TransportError):
-    #     message = "Sorry, I couldn't find %s." % original_search_term
-    #     error_result = {'hasError': True, 'message': message}
-    #     return error_result
+    # get lat-long from facebook search api -- we can get school address, city town etc. too
     fb_api = FBSearcher()
-    lat_lng_result = fb_api.get_lat_long(search_term = search_term)
-    lat = lat_lng_result['lat']
-    lng = lat_lng_result['lng'] 
+    for current_search_term in search_terms_to_try:
+        lat_lng_result = fb_api.get_lat_long(search_term = current_search_term)
+        if lat_lng_result.get('lat') != None and lat_lng_result.get('lng') != None:
+            lat = lat_lng_result['lat']
+            lng = lat_lng_result['lng']
+            break
+
+    #error checking -- lat_lng_result would only be empty if we exhausted all options
+    if lat_lng_result.get('lat') == None:
+        message = "Sorry, I couldn't find any results for %s." % original_search_term
+        error_result = {'hasError': True, 'message': message}
+        return error_result
 
     success_results = []
     ig_shortcodes = []
@@ -151,3 +151,40 @@ def get_ig_shortcode(link_url):
     start = link_url.index('/p')
     shortcode = link_url[start + 3: -1]
     return shortcode
+
+def translate_short_name(search_term):
+    # just a start; eventually this will be a separate file (much larger) loaded into memory
+    short_names = {
+        'nyu': 'new york university',
+        'risd': 'rhode island school of design',
+        'berkeley': 'university of california, berkeley',
+        'madison': 'university of wisconsin-madison',
+        'wisconsin': 'university of wisconsin-madison',
+        'umass': 'university of massachusetts amherst',
+        'illinois': 'university of illinois at urbana-champaign',
+        'university of illinois': 'university of illinois at urbana-champaign',
+        'pratt': 'pratt institute',
+        'colorado': 'university of colorado boulder',
+    }
+    if search_term in short_names.keys():
+        return short_names[search_term]
+    else:
+        return search_term
+
+# TODO: Method that translates abbreviations like UC Davis = University of California at Davis
+def resolve_search_term(search_term):
+    translated_short_name = translate_short_name(search_term)
+    match_words = ['university', 'college', 'institute', 'school']
+
+    if search_term != translated_short_name:
+        # use the translated value if there is one
+        search_terms_to_try = [translated_short_name]
+    elif len([word for word in match_words if word in search_term]) > 0:
+        search_terms_to_try = [search_term]
+    else:
+        search_terms_to_try = [
+            'university of ' + search_term,
+            search_term + ' university',
+            search_term + ' college',
+            ]
+    return search_terms_to_try        
