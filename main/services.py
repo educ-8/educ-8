@@ -14,12 +14,12 @@ class FBSearcher:
         search_result = {}
         args = {'q': search_term, 'type':'place', 'category':'university'}
         places = self.client.request('search', args)
-        for place in places['data']:
-            if place['name'].lower() == search_term.lower(): # is this condition too restrictive? requires 100% match ... could simply trust the api and return the first item in the list...
-                search_result['lat'] = place['location']['latitude']
-                search_result['lng'] = place['location']['longitude']
-                search_result['place_id'] = place['id']
-                break
+        
+        result = places['data'][0]
+        search_result['lat'] = result['location']['latitude']
+        search_result['lng'] = result['location']['longitude']
+        search_result['place_id'] = result['id']
+        
         return search_result
 
 class GMapsSearcher:
@@ -155,11 +155,10 @@ def get_ig_shortcode(link_url):
 def translate_short_name(search_term):
     # just a start; eventually this will be a separate file (much larger) loaded into memory
     short_names = {
-        'nyu': 'new york university',
-        'risd': 'rhode island school of design',
         'berkeley': 'university of california, berkeley',
         'madison': 'university of wisconsin-madison',
         'wisconsin': 'university of wisconsin-madison',
+        'university of wisconsin': 'university of wisconsin-madison',
         'umass': 'university of massachusetts amherst',
         'illinois': 'university of illinois at urbana-champaign',
         'university of illinois': 'university of illinois at urbana-champaign',
