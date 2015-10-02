@@ -36,6 +36,9 @@ function search() {
         }
       },
       error: function(xhr, errmsg, err) {
+        console.log(err);
+        console.log(xhr);
+        console.log(errmsg);
         $('.status-message').fadeOut();
         var errorMessage = $('<p> Sorry, something went wrong. Please try again. </p>').addClass('error-message');
         $('#status').empty().append(errmsg);
@@ -45,37 +48,60 @@ function search() {
 };
 
 function showResults(results, search_term) {
-    var resultsList = $('<ul></ul>');
-    results.forEach(function (result){
-        var resultsListItem = $('<li></li>').addClass('search-result');
-        var user = $('<h4>' + result.username + '</h4>').addClass('ig-username');
-        var avatar = $('<img src="' + result.avatar + '"">').addClass('ig-avatar');
-        var created = $('<p>' + result.created.substring(0,10) + '</p>').addClass('ig-created');
-        var location = $('<p>' + result.location_name + '</p>').addClass('ig-location');
-        var image = $('<img src="' + result.url + '">').addClass('ig-main-image');
-        var caption = $('<p>' + result.caption + '</p>').addClass('ig-caption');
+    var tweets = [];
+    var instagrams = [];
 
-        // handler to confirm images loaded
-        if (result.url) {
-            $(image, avatar).on('error', function(){
-                console.log("main image didn't load");
-                $(this).parent().remove();
-            });
-        };
-
-        resultsListItem.append(user)
-            .append(avatar)
-            .append(created)
-            .append(location);
-        if (result.url) {resultsListItem.append(image);}    
-        resultsListItem.append(caption);
-        resultsList.append(resultsListItem);
-    });
     var statusMessage = $('<p>Latest posts from ' + search_term + ':</p>').addClass('result-message');
+    $("#results").empty();
     $('#status').empty().append(statusMessage);
     $('.result-message').fadeIn(1000);
-    $('#results').empty().append(resultsList);
+    results.forEach(function (result){
+        var resultsListItem = $('<div class="social-post"></div>');
+        if (result.source == "Instagram") {
+            resultsListItem.attr("id", result.ig_shortcode);
+            $("#results").append(resultsListItem);
+            instagrams.push(result.ig_shortcode);
+        } else if (result.source == "Twitter") {
+            resultsListItem.attr("id", result.post_id);
+            $("#results").append(resultsListItem);
+            tweets.push(result.post_id);
+        };
+    });
+
+    instagrams.forEach(function(instagram){
+        addIGOembed(instagram, instagrams);
+    });
+
+    tweets.forEach(function(tweet){
+        displayTweet(tweet);
+    });
 };
+
+var addIGOembed = function(instagram, instagram_ids) {
+    $.ajax({
+        url: 'http://api.instagram.com/oembed?url=http://instagr.am/p/' + instagram + '/&omitscript=true',
+        type: 'GET',
+        cache: false,
+        dataType: 'jsonp',
+        success: function(data){
+        $('#'+ instagram).append(data.html);
+        instgrm.Embeds.process();
+        },
+        error: function(){
+          console.log('error');
+        }
+    });
+};
+
+var displayTweet = function(tweet_id) {
+    twttr.widgets.createTweet(
+      tweet_id,
+      document.getElementById(tweet_id),
+      {
+        conversation: 'none'
+      }
+      );
+  };
 
 // Form post security script. Source: https://gist.github.com/broinjc/db6e0ac214c355c887e5
 // This function gets cookie with a given name

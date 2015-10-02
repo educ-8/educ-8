@@ -5,6 +5,16 @@ import facebook
 import os
 import ipdb
 
+"""TODO:
+refactor
+1. twitter object just gets tweets x 
+2. ig object just gets instagram x
+3. need the ig shortcode -> additional ajax call on front end to get the oembed html, append the html to the right place in timeline (create div with id, append this to timeline, and pass this to the function that has the ajax call)
+4. tweets need the tweet id -> on success function from backend, use twitter widget to make the tweet with cards = true (to show media)
+5. don't worry about gathering instagram shortcodes on tweets for now; people can just click the image link
+6. create db objects for school, hashtag, post, school_hashtag join
+"""
+
 # TODO: Break each class definition into a separate file and update import statements as needed
 class FBSearcher:
     """Creates a Facebook client and returns search results"""
@@ -39,14 +49,15 @@ class InstagramSearcher:
     def __init__(self):
         self.client = InstagramAPI(client_id=os.environ['EDUC8_IG_CLIENT_ID'], client_secret=os.environ['EDUC8_IG_CLIENT_SECRET'])
         self.search_results = []
-        self.ig_shortcodes = []
+
     def get_ig_locations(self, lat, lng):
         return self.client.location_search(lat=lat, lng=lng)
+
     def search_all_locations(self, locations):
         for location in locations:
             results = self.client.location_recent_media(location_id = location.id)
             for media in results[0]:
-                result = {}
+                result = {'source': 'Instagram'}
                 result['location_name'] = location.name
                 result['created'] = media.created_time
                 result['username'] = media.user.username
@@ -57,16 +68,17 @@ class InstagramSearcher:
                     result['caption'] = ""   
                 result['url'] = media.images['standard_resolution'].url
                 result['ig_shortcode'] = get_ig_shortcode(media.link) # TODO: this helper method is used by both IG and TwitterSearcher objects, how to make this work?
-                self.ig_shortcodes.append(result['ig_shortcode'])
                 self.search_results.append(result)
+
+    def get_photo_url_from_shortcode(self, shortcode):
+        ig_result = self.client.media_shortcode(shortcode)
+        return ig_result.images['standard_resolution'].url
 
 class TwitterSearcher:
     """Creates a Twitter API client and returns search results"""
-    def __init__(self, old_ig_shortcodes = []):
+    def __init__(self):
         self.client = self.open_client()
         self.search_results = []
-        self.old_ig_shortcodes = old_ig_shortcodes
-        self.new_ig_shortcodes = []
 
     def open_client(self):
         auth = tweepy.OAuthHandler(os.environ['EDUC8_TWITTER_CONSUMER_KEY'], os.environ['EDUC8_TWITTER_CONSUMER_SECRET'])
@@ -76,7 +88,8 @@ class TwitterSearcher:
     def search_by_geocode(self, geocode):
         tweets = self.client.search(geocode=geocode, rpp=100, show_user=True)
         for tweet in tweets:
-            result = {}
+            result = {'source': 'Twitter'}
+            result['post_id'] = tweet.id_str
             if hasattr(tweet, 'location'):
                 result['location_name'] = tweet.location
             else:
@@ -87,26 +100,10 @@ class TwitterSearcher:
             result['caption'] = tweet.text
             if 'media' in tweet.entities:
                 result['url'] = tweet.entities['media'][0]['media_url_https']
-                result['ig_shortcode'] = None
-            elif tweet.source == "Instagram":
-                link_url = [url['expanded_url'] for url in tweet.entities['urls'] if 'instagram' in url['expanded_url']][0]
-                result['ig_shortcode'] = get_ig_shortcode(link_url)    
-                if result['ig_shortcode'] not in self.old_ig_shortcodes and not len(result['ig_shortcode']) > 10:                    
-                    # shortcodes > 10 characters are for private accounts; IG won't return them
-                    # go to Instagram for the url
-                    try:
-                        ig_result = InstagramSearcher().client.media_shortcode(result['ig_shortcode'])
-                        result['url'] = ig_result.images['standard_resolution'].url
-                    except:
-                        # catch any other IG errors
-                        result['exclude'] = True
-                else:
-                    result['exclude'] = True        
-            else:
-                result['ig_shortcode'] = None
-                result['exclude'] = True
-            if not 'exclude' in result.keys():
-                self.search_results.append(result)
+            if 'hashtags' in tweet.entities and len(tweet.entities['hashtags']) > 0:
+                result['hashtags'] = [tag['text'] for tag in tweet.entities['hashtags']] 
+            self.search_results.append(result)
+
 
 # TODO: Create a SchoolSearchManager object that handles the entire search and returns the result to the front end
 def get_photos(search_term):
@@ -125,21 +122,19 @@ def get_photos(search_term):
             break
 
     #error checking -- lat_lng_result would only be empty if we exhausted all options
-    if lat_lng_result.get('lat') == None:
+    if lat_lng_result.get('lat') == None or lat_lng_result.get('lng') == None:
         message = "Sorry, I couldn't find any results for %s." % original_search_term
         error_result = {'hasError': True, 'message': message}
         return error_result
 
     success_results = []
-    ig_shortcodes = []
 
     ig_api = InstagramSearcher()
     locations = ig_api.get_ig_locations(lat=lat, lng=lng)
     ig_api.search_all_locations(locations=locations)
     success_results += ig_api.search_results
-    ig_shortcodes += ig_api.ig_shortcodes
 
-    tw_api = TwitterSearcher(ig_shortcodes)
+    tw_api = TwitterSearcher()
     geocode = "{0},{1},1km".format(lat,lng)
     tw_api.search_by_geocode(geocode=geocode)
     success_results += tw_api.search_results
