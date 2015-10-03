@@ -79,7 +79,7 @@ function showResults(results, search_term) {
 
 var addIGOembed = function(instagram, instagram_ids) {
     $.ajax({
-        url: 'http://api.instagram.com/oembed?url=http://instagr.am/p/' + instagram + '/&omitscript=true',
+        url: 'https://api.instagram.com/oembed?url=http://instagr.am/p/' + instagram + '/&omitscript=true',
         type: 'GET',
         cache: false,
         dataType: 'jsonp',
