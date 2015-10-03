@@ -19,7 +19,6 @@ class Post(models.Model):
 
 class Hashtag(models.Model):
     text = models.CharField(max_length=255)
-    schools = models.ManyToManyField(School, through="HashtagUse")
 
 class School(models.Model):
     name = models.CharField(max_length=255)
