@@ -1,5 +1,20 @@
+/* RESET */
+/* TODO: Add css reset here */
+
+
+/* top navbar*/
+img#navbar-logo {
+  position: relative;
+  top: -14px;
+  height: 48px;
+}
+
 .social-post {
   margin-bottom: 40px;
+}
+
+.top {
+  margin-top: 70px;
 }
 
 input[type="text"] {

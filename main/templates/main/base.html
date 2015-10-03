@@ -18,21 +18,33 @@
     {% endblock %}
   </head>
   <body>
-    <div class="header navbar">
-      <div class="container">
-        <a class="navbar-brand" href="/">Educ-8</a>
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="{% url 'home' %}">Home</a></li>
-          <li><a href="{% url 'about' %}">About</a></li>
-          {% if request.user.is_authenticated %}
-            <!-- users:detail -->
-            <li><a href="{% url 'profile' request.user.username %}">{% trans "My Profile" %}</a></li>
-            <li><a href="{% url 'account_logout' %}">{% trans "Logout" %}</a></li>
-          {% else %}
-            <li><a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a></li>
-            <li><a href="{% url 'account_login' %}">{% trans "Log in" %}</a></li>
-          {% endif %}  
-        </ul>
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">
+            <img id="navbar-logo" src="{% static "images/logo.png" %}" alt="Educ-8"/>
+          </a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-navbar-collapse">
+          <ul class="nav navbar-nav">
+            <!-- <li class="active"><a href="{% url 'home' %}">Home</a></li> -->
+            <li><a href="{% url 'about' %}">About Educ-8</a></li>
+            {% if request.user.is_authenticated %}
+              <!-- users:detail -->
+              <li><a href="{% url 'profile' request.user.username %}">{% trans "My Profile" %}</a></li>
+              <li><a href="{% url 'account_logout' %}">{% trans "Logout" %}</a></li>
+            {% else %}
+              <li><a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a></li>
+              <li><a href="{% url 'account_login' %}">{% trans "Log in" %}</a></li>
+            {% endif %}  
+          </ul>
+        </div>
       </div>
     </div>
 

@@ -6,12 +6,6 @@ import os
 import ipdb
 
 """TODO:
-refactor
-1. twitter object just gets tweets x 
-2. ig object just gets instagram x
-3. need the ig shortcode -> additional ajax call on front end to get the oembed html, append the html to the right place in timeline (create div with id, append this to timeline, and pass this to the function that has the ajax call)
-4. tweets need the tweet id -> on success function from backend, use twitter widget to make the tweet with cards = true (to show media)
-5. don't worry about gathering instagram shortcodes on tweets for now; people can just click the image link
 6. create db objects for school, hashtag, post, school_hashtag join
 """
 
