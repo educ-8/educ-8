@@ -26,8 +26,8 @@ input[type="text"] {
   padding-left: 0;
 }
 
-.status-message, 
-.result-message, 
+.status-message,
+.result-message,
 .error-message {
   font-size: 24px;
   display: none;
@@ -52,10 +52,16 @@ input[type="text"] {
 
 .ig-caption {
 /* overrides setting above by cascade */
-  max-width: 660px; 
+  max-width: 660px;
 }
 
 .ig-avatar {
   /* overrides setting above by cascade */
   max-width: 150px;
+}
+
+#results-map {
+    height: 400px;
+    width: 400px;
+    float: right;
 }

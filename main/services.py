@@ -18,12 +18,12 @@ class FBSearcher:
         search_result = {}
         args = {'q': search_term, 'type':'place', 'category':'university'}
         places = self.client.request('search', args)
-        
+
         result = places['data'][0]
         search_result['lat'] = result['location']['latitude']
         search_result['lng'] = result['location']['longitude']
         search_result['place_id'] = result['id']
-        
+
         return search_result
 
 class GMapsSearcher:
@@ -59,7 +59,7 @@ class InstagramSearcher:
                 if media.caption:
                     result['caption'] = media.caption.text
                 else:
-                    result['caption'] = ""   
+                    result['caption'] = ""
                 result['url'] = media.images['standard_resolution'].url
                 result['ig_shortcode'] = get_ig_shortcode(media.link) # TODO: this helper method is used by both IG and TwitterSearcher objects, how to make this work?
                 self.search_results.append(result)
@@ -95,7 +95,7 @@ class TwitterSearcher:
             if 'media' in tweet.entities:
                 result['url'] = tweet.entities['media'][0]['media_url_https']
             if 'hashtags' in tweet.entities and len(tweet.entities['hashtags']) > 0:
-                result['hashtags'] = [tag['text'] for tag in tweet.entities['hashtags']] 
+                result['hashtags'] = [tag['text'] for tag in tweet.entities['hashtags']]
             self.search_results.append(result)
 
 
@@ -134,7 +134,8 @@ def get_photos(search_term):
     success_results += tw_api.search_results
 
     sorted_results = sorted(success_results, key=lambda r: r['created'], reverse=True)
-    return sorted_results
+    payload = {"location": {"lat": lat, "lng": lng}, "posts": sorted_results}
+    return payload
 
 def get_ig_shortcode(link_url):
     start = link_url.index('/p')
@@ -176,4 +177,4 @@ def resolve_search_term(search_term):
             search_term + ' university',
             search_term + ' college',
             ]
-    return search_terms_to_try        
+    return search_terms_to_try

@@ -4,6 +4,7 @@ $(function() {
     e.preventDefault();
     var search_term = $.trim($('#search-term').val())
     $('#results').empty();
+    $('#results-map').hide();
     var statusMessage = $('<p>Searching for ' + search_term + '...</p>').addClass('status-message');
     $('#status').empty().append(statusMessage);
     $('.status-message').fadeIn(1000);
@@ -17,7 +18,7 @@ $(function() {
             }, 1000)
         })
     }, 2200);
-  });  
+  });
 });
 
 function search() {
@@ -32,7 +33,8 @@ function search() {
             $('#status').empty().append(errorMessage);
             $('.error-message').fadeIn(1000);
         } else {
-            showResults(json, search_term);
+            showPostResults(json, search_term);
+            showMapResults(json);
         }
       },
       error: function(xhr, errmsg, err) {
@@ -47,7 +49,7 @@ function search() {
     });
 };
 
-function showResults(results, search_term) {
+function showPostResults(results, search_term) {
     var tweets = [];
     var instagrams = [];
 
@@ -55,7 +57,7 @@ function showResults(results, search_term) {
     $("#results").empty();
     $('#status').empty().append(statusMessage);
     $('.result-message').fadeIn(1000);
-    results.forEach(function (result){
+    results['posts'].forEach(function (result){
         var resultsListItem = $('<div class="social-post"></div>');
         if (result.source == "Instagram") {
             resultsListItem.attr("id", result.ig_shortcode);
@@ -76,6 +78,23 @@ function showResults(results, search_term) {
         displayTweet(tweet);
     });
 };
+
+var showMapResults = function(results) {
+    $('#results-map').gmap3({
+        map:{
+            options:{
+                center: [results['location']['lat'],results['location']['lng']],
+                zoom: 8
+            }
+        },
+        marker:{
+            values:[
+                {latLng:[results['location']['lat'],results['location']['lng']]}
+            ]
+        }
+    });
+    $('#results-map').show();
+}
 
 var addIGOembed = function(instagram, instagram_ids) {
     $.ajax({
