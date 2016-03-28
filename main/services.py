@@ -1,5 +1,6 @@
 from googlemaps import googlemaps
 from instagram.client import InstagramAPI
+from instagram.bind import InstagramAPIError
 import tweepy
 import facebook
 import os
@@ -49,20 +50,25 @@ class InstagramSearcher:
 
     def search_all_locations(self, locations):
         for location in locations:
-            results = self.client.location_recent_media(location_id = location.id)
-            for media in results[0]:
-                result = {'source': 'Instagram'}
-                result['location_name'] = location.name
-                result['created'] = media.created_time
-                result['username'] = media.user.username
-                result['avatar'] = media.user.profile_picture
-                if media.caption:
-                    result['caption'] = media.caption.text
-                else:
-                    result['caption'] = ""
-                result['url'] = media.images['standard_resolution'].url
-                result['ig_shortcode'] = get_ig_shortcode(media.link) # TODO: this helper method is used by both IG and TwitterSearcher objects, how to make this work?
-                self.search_results.append(result)
+            try:
+                results = self.client.location_recent_media(location_id = location.id)
+                for media in results[0]:
+                    result = {'source': 'Instagram'}
+                    result['location_name'] = location.name
+                    result['created'] = media.created_time
+                    result['username'] = media.user.username
+                    result['avatar'] = media.user.profile_picture
+                    if media.caption:
+                        result['caption'] = media.caption.text
+                    else:
+                        result['caption'] = ""
+                    result['url'] = media.images['standard_resolution'].url
+                    result['ig_shortcode'] = get_ig_shortcode(media.link) # TODO: this helper method is used by both IG and TwitterSearcher objects, how to make this work?
+                    self.search_results.append(result)
+            except InstagramAPIError as e:
+                print e
+            except Exception as ex:
+                print ex
 
     def get_photo_url_from_shortcode(self, shortcode):
         ig_result = self.client.media_shortcode(shortcode)
@@ -96,7 +102,10 @@ class TwitterSearcher:
                 result['url'] = tweet.entities['media'][0]['media_url_https']
             if 'hashtags' in tweet.entities and len(tweet.entities['hashtags']) > 0:
                 result['hashtags'] = [tag['text'] for tag in tweet.entities['hashtags']]
-            self.search_results.append(result)
+            # filter out spam job / career tweets
+            if 'jobs' not in tweet.user.name.lower() and \
+            'careers' not in tweet.user.name.lower():
+                self.search_results.append(result)
 
 
 # TODO: Create a SchoolSearchManager object that handles the entire search and returns the result to the front end
